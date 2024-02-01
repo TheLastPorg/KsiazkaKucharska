@@ -10,4 +10,6 @@
     <string name="tytul_przepisu">Tytuł przepisu</string>
     <string name="wybierz_z_galerii">Wybierz z galerii</string>
     <string name="zrob_zdjecie">Zrób zdjęcie</string>
+    <string name="zatwierdz">Zatwierdź zmiany</string>
+    <string name="usun_przepis">Usuń przepis</string>
 </resources>

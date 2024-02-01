@@ -3,20 +3,14 @@ package com.example.kucharska;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
-import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.hardware.Sensor;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -28,20 +22,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.snackbar.Snackbar;
-import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
@@ -54,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements SensorDataListene
 
     private PrzepisRepository przepisRepository;
     private PrzepisAdapter przepisAdapter;
+    private PrzepisViewModel przepisViewModel;
 
     private static final int REQUEST_CODE_READ_EXTERNAL_STORAGE = 1;
 
@@ -95,7 +86,8 @@ public class MainActivity extends AppCompatActivity implements SensorDataListene
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         Log.d("MainActivity", "Start sensor");
 
-        loadRecipesFromDatabase();
+        przepisViewModel = new ViewModelProvider(this).get(PrzepisViewModel.class);
+        przepisViewModel.findAll().observe(this, przepisAdapter::setPrzepisy);
     }
 
 
@@ -107,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements SensorDataListene
         relativeLayout.setBackgroundColor(backgroundColor);
     }
 
-    public void loadRecipesFromDatabase() {
+    /*public void loadRecipesFromDatabase() {
         Log.d("MainActivity", "loadRecipesFromDatabase");
         przepisRepository.getPrzepisy().observe(this, new Observer<List<Przepis>>() {
             @Override
@@ -119,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements SensorDataListene
                 }
             }
         });
-    }
+    }*/
 
     private boolean checkNullOrEmpty(String text) {
         Log.d("MainActivity", "checkNullOrEmpty");
@@ -207,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements SensorDataListene
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
-    private class PrzepisHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    private class PrzepisHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         private TextView titleTextView;
         private TextView ingredientsTextView;
         private TextView instructionsTextView;
@@ -219,6 +211,7 @@ public class MainActivity extends AppCompatActivity implements SensorDataListene
             super(inflater.inflate(R.layout.przepis_list_item, parent, false));
             Log.d("MainActivity", "PrzepisHolder");
             itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
             titleTextView = itemView.findViewById(R.id.recipe_name);
             ingredientsTextView = itemView.findViewById(R.id.recipe_ingredients);
             instructionsTextView = itemView.findViewById(R.id.recipe_instructions);
@@ -255,22 +248,25 @@ public class MainActivity extends AppCompatActivity implements SensorDataListene
         @Override
         public void onClick(View v) {
             if (przepis != null) {
-                Log.d("Click", "onClick");
                 Intent intent = new Intent(MainActivity.this, PrzepisInfo.class);
-                Log.d("Click", "intent");
                 intent.putExtra(PrzepisInfo.RECIPE_INFO_TITLE, przepis.getTitle());
-                Log.d("Click", intent.getStringExtra(PrzepisInfo.RECIPE_INFO_TITLE));
                 intent.putExtra(PrzepisInfo.RECIPE_INFO_INGREDIENTS, przepis.getIngredients());
-                Log.d("Click", intent.getStringExtra(PrzepisInfo.RECIPE_INFO_INGREDIENTS));
                 intent.putExtra(PrzepisInfo.RECIPE_INFO_INSTRUCTIONS, przepis.getInstructions());
-                Log.d("Click", intent.getStringExtra(PrzepisInfo.RECIPE_INFO_INSTRUCTIONS));
                 intent.putExtra(PrzepisInfo.RECIPE_INFO_SERVINGS, przepis.getServings());
-                Log.d("Click", intent.getStringExtra(PrzepisInfo.RECIPE_INFO_SERVINGS));
                 intent.putExtra(PrzepisInfo.RECIPE_INFO_IMAGE, przepis.getImage());
-                Log.d("Click", intent.toString());
+                intent.putExtra(PrzepisInfo.PRZEPIS, przepis);
                 startActivity(intent);
             }
         }
+        @Override
+        public boolean onLongClick(View v) {
+            if (przepis != null) {
+                przepisViewModel.delete(this.przepis);
+                return true;
+            }
+            return false;
+        }
+
         private void loadImageFromUri(Uri uri) {
             try {
                 InputStream inputStream = getContentResolver().openInputStream(uri);

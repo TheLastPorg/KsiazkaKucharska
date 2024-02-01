@@ -1,0 +1,95 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/przepisinfo_scroll">
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/edit_przepis"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center">
+
+        <EditText
+            android:id="@+id/edit_text_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/tytul_przepisu"
+            android:inputType="text"
+            android:layout_margin="16dp"/>
+
+        <EditText
+            android:id="@+id/edit_text_ingredients"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/edit_text_title"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:hint="@string/skladniki"
+            android:inputType="textMultiLine" />
+
+        <EditText
+            android:id="@+id/edit_text_instructions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/edit_text_ingredients"
+            android:layout_margin="16dp"
+            android:hint="@string/instrukcje"
+            android:inputType="textMultiLine"/>
+
+        <EditText
+            android:id="@+id/edit_text_servings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/edit_text_instructions"
+            android:hint="@string/liczba_porcji"
+            android:inputType="number"
+            android:layout_margin="16dp"/>
+
+        <ImageView
+            android:id="@+id/image_view"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_below="@id/edit_text_servings"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:src="@drawable/placeholder_image" />
+
+        <Button
+            android:id="@+id/button_gallery"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/image_view"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_alignParentStart="true"
+            android:text="Wybierz z galerii" />
+
+        <Button
+            android:id="@+id/button_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/image_view"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_alignParentEnd="true"
+            android:text="Zrób zdjęcie" />
+
+        <Button
+            android:id="@+id/button_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/button_gallery"
+            android:layout_centerHorizontal="true"
+            android:text="@string/zatwierdz"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/green"/>
+
+    </RelativeLayout>
+
+</ScrollView>

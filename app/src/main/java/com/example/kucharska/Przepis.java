@@ -7,8 +7,10 @@ import com.google.gson.annotations.SerializedName;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
+
 @Entity(tableName = "przepisy")
-public class Przepis {
+public class Przepis implements Serializable {
 
     @PrimaryKey(autoGenerate = true)
     private int id;

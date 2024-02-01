@@ -104,7 +104,9 @@ public class DodajPrzepisActivity extends AppCompatActivity implements SensorDat
             @Override
             public void onClick(View v) {
                 dodajPrzepisDoBazy();
+                finish();
             }
+
         });
 
         SensorService.setSensorDataListener(this);
@@ -116,22 +118,18 @@ public class DodajPrzepisActivity extends AppCompatActivity implements SensorDat
         String title = titleEditText.getText().toString().trim();
         String ingredients = ingredientsEditText.getText().toString().trim();
         String instructions = instructionsEditText.getText().toString().trim();
-        String servings = servingsEditText.getText().toString().trim();
+        String servings = servingsEditText.getText().toString().trim() + " servings";
 
         if (TextUtils.isEmpty(title) || TextUtils.isEmpty(ingredients) || TextUtils.isEmpty(instructions) || TextUtils.isEmpty(servings) || selectedImageUri == null) {
             Toast.makeText(this, "Wszystkie pola są wymagane", Toast.LENGTH_SHORT).show();
             return;
         }
         String imagePath = selectedImageUri.toString();
-        Log.d("zdj", "dodajPrzepisDoBazy: " + imagePath);
 
-        // Walidacja danych, dodanie przepisu do bazy danych
         Przepis przepis = new Przepis(title, ingredients, instructions, servings, imagePath);
         przepisRepository.insert(przepis);
 
         Toast.makeText(this, "Przepis dodany pomyślnie", Toast.LENGTH_SHORT).show();
-        Log.d("zdj", "Przepis dodany pomyślnie");
-        // Możesz dodać też kod do zamykania tej aktywności po dodaniu przepisu, jeśli jest to wymagane
     }
 
     private void setTextColorForViewGroup(ViewGroup viewGroup, int color) {
@@ -149,22 +147,18 @@ public class DodajPrzepisActivity extends AppCompatActivity implements SensorDat
     public void OnResume() {
         super.onResume();
         sensorService.setSensorDataListener(this);
-        Log.d("zdj", "Metoda OnResume została wywołana");
     }
 
     @Override
     public void OnPause() {
         super.onPause();
         sensorService.setSensorDataListener(null);
-        Log.d("zdj", "Metoda OnPause została wywołana");
     }
 
     @Override
     public void onColorsChanged(int textColor, int backgroundColor) {
-        // Zastosowanie zmiany koloru tekstu dla wszystkich TextView
         findViewById(R.id.dodaj_przepis).setBackgroundColor(backgroundColor);
         setTextColorForViewGroup((ViewGroup) findViewById(android.R.id.content), textColor);
-        Log.d("zdj", "Zmiana kolorów została zastosowana");
     }
 
     @Override
@@ -255,7 +249,6 @@ public class DodajPrzepisActivity extends AppCompatActivity implements SensorDat
                     });
         } catch (IOException e) {
             e.printStackTrace();
-            Log.e("zdj", "Błąd podczas zapisywania obrazu: " + e.getMessage());
         }
     }
 
@@ -263,8 +256,5 @@ public class DodajPrzepisActivity extends AppCompatActivity implements SensorDat
     @Override
     public void onScanCompleted(String path, Uri uri) {
         selectedImageUri = uri;
-        Log.d("zdj", "URI obrazu po skanowaniu: " + selectedImageUri);
-
-        // Tutaj możesz wykonywać dodatkowe operacje związane z ustawieniem URI obrazu, np. aktualizację interfejsu użytkownika.
     }
 }

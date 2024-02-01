@@ -30,6 +30,7 @@
         <activity
             android:name=".PrzepisInfo"
             android:exported="false" />
+        <activity android:name=".EditPrzepis" />
         <activity android:name=".DodajPrzepisActivity" />
         <activity
             android:name=".MainActivity"

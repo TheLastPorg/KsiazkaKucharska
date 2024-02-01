@@ -6,4 +6,6 @@
     <color name="light_text_color">#FFFFFF</color>
     <color name="light_hint_color">#AAAAAA</color>
     <color name="dark_hint_color">#777777</color>
+    <color name="green">#00FF00</color>
+    <color name="red">#FF0000</color>
 </resources>

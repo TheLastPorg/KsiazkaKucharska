@@ -35,7 +35,9 @@ public class PrzepisInfo extends AppCompatActivity implements SensorDataListener
     public static final String RECIPE_INFO_INSTRUCTIONS = "RECIPE_INFO_INSTRUCTIONS";
     public static final String RECIPE_INFO_SERVINGS = "RECIPE_INFO_SERVINGS";
     public static final String RECIPE_INFO_IMAGE = "RECIPE_INFO_IMAGE";
+    public static final String PRZEPIS = "PRZEPIS";
     private PrzepisViewModel przepisViewModel;
+    private Przepis przepis;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,20 +56,22 @@ public class PrzepisInfo extends AppCompatActivity implements SensorDataListener
         przepisInstructionsTextView.setText(getFormattedInstructions(intent.getStringExtra(RECIPE_INFO_INSTRUCTIONS)));
         przepisServingsTextView.setText(intent.getStringExtra(RECIPE_INFO_SERVINGS));
         String image = intent.getStringExtra(RECIPE_INFO_IMAGE);
+        przepis = (Przepis) intent.getSerializableExtra(PRZEPIS);
+
         Log.d("przepisinfo", "image string: " + image);
 
 
         if (image != null) {
             Picasso.get().load(image).into(przepisImage);
         } else {
-            Picasso.get().load(R.drawable.ic_launcher_background).into(przepisImage);
+            Picasso.get().load(R.drawable.meal).into(przepisImage);
         }
 
         Button editRecipeButton = findViewById(R.id.edit_recipe_button);
         editRecipeButton.setText("Dodaj przepis");
 
         przepisViewModel = new ViewModelProvider(this).get(PrzepisViewModel.class);
-        przepisViewModel.getPrzepisy().observe(this, new Observer<List<Przepis>>() {
+        przepisViewModel.findAll().observe(this, new Observer<List<Przepis>>() {
             @Override
             public void onChanged(List<Przepis> przepisList) {
                 if(przepisList != null) {
@@ -77,15 +81,12 @@ public class PrzepisInfo extends AppCompatActivity implements SensorDataListener
                             isRecipeInDatabase = true;
                             break;
                         }
-                        Log.d("aaa", "isRecipeInDatabase " + isRecipeInDatabase);
                     }
                 } else {
-                    Log.d("aaa", "przepisy is null");
+                    isRecipeInDatabase = false;
                 }
             }
         });
-
-        Log.d("aaa", "isRecipeInDatabas2e" + isRecipeInDatabase);
 
         SensorService.setSensorDataListener(this);
         onColorsChanged(SensorService.getTextColor(), SensorService.getBackgroundColor());
@@ -119,7 +120,11 @@ public class PrzepisInfo extends AppCompatActivity implements SensorDataListener
         StringBuilder stringBuilder = new StringBuilder();
         List<String> items = Arrays.asList(text.split("\\|"));
         for (String item : items) {
-            stringBuilder.append("- ").append(item.trim()).append("\n");
+            String trimmedItem = item.trim();
+            if (!trimmedItem.startsWith("-")) {
+                stringBuilder.append("- ");
+            }
+            stringBuilder.append(trimmedItem).append("\n");
         }
         return stringBuilder.toString();
     }
@@ -127,27 +132,37 @@ public class PrzepisInfo extends AppCompatActivity implements SensorDataListener
     private String getFormattedInstructions(String text) {
         StringBuilder stringBuilder = new StringBuilder();
         List<String> items = Arrays.asList(text.split("\\."));
+        int stepNumber = 1; // zaczynamy od kroku 1
         for (int i = 0; i < items.size(); i++) {
             String item = items.get(i).trim();
             if (!item.isEmpty()) {
-                stringBuilder.append((i + 1) + ". ").append(item).append("\n\n");
+                if (item.startsWith("step")) {
+                    // Jeśli zdanie zaczyna się od "step", nie dodawaj kolejnego numeru kroku
+                    stringBuilder.append(item).append("\n\n");
+                } else {
+                    // Dodaj numer kroku tylko wtedy, gdy zdanie nie zaczyna się od "step"
+                    stringBuilder.append("step ").append(stepNumber++).append(": ").append(item).append("\n\n");
+                }
             }
         }
         return stringBuilder.toString();
     }
 
+
     public void onEditRecipeButtonClick(View view) {
         if(isRecipeInDatabase) {
-            /*Intent intent = new Intent(this, EditRecipe.class);
+            Intent intent = new Intent(this, EditPrzepis.class);
             intent.putExtra(RECIPE_INFO_TITLE, przepisTitleTextView.getText().toString());
             intent.putExtra(RECIPE_INFO_INGREDIENTS, przepisIngredientsTextView.getText().toString());
             intent.putExtra(RECIPE_INFO_INSTRUCTIONS, przepisInstructionsTextView.getText().toString());
             intent.putExtra(RECIPE_INFO_IMAGE, getIntent().getStringExtra(RECIPE_INFO_IMAGE));
-            intent.putExtra(RECIPE_INFO_SERVINGS, przepisServings);
-            startActivity(intent);*/
+            intent.putExtra(RECIPE_INFO_SERVINGS, przepisServingsTextView.getText().toString());
+            intent.putExtra(PRZEPIS, przepis);
+            startActivity(intent);
         } else {
             dodajPrzepisDoZapisanych();
         }
+        finish();
     }
 
     @Override

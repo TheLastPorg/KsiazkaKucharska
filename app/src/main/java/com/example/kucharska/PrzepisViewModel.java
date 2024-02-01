@@ -20,11 +20,15 @@ public class PrzepisViewModel extends AndroidViewModel {
         Log.d("xd", "PrzepisViewModel created " + przepisy.getValue());
     }
 
-    LiveData<List<Przepis>> getPrzepisy() { return przepisy; }
+    LiveData<List<Przepis>> findAll() { return przepisy; }
 
     void insert(Przepis przepis) { repository.insert(przepis); }
 
     void update(Przepis przepis) { repository.update(przepis); }
 
     void delete(Przepis przepis) { repository.delete(przepis); }
+
+    LiveData<Przepis> findByTitle(String title) { return repository.findByTitle(title); }
+    LiveData<Integer> findIdByTitle(String title) { return repository.findIdByTitle(title); }
+    LiveData<Przepis> findPrzepisById(int id) { return repository.findPrzepisById(id); }
 }

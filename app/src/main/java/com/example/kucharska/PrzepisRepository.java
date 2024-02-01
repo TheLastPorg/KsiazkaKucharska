@@ -37,4 +37,15 @@ public class PrzepisRepository {
     public void clearDatabase() {
         PrzepisyDatabase.databaseWriteExecutor.execute(przepisDao::deleteAll);
     }
+    public LiveData<Przepis> findByTitle(String title) {
+        return przepisDao.getPrzepisByTitle(title);
+    }
+
+    public LiveData<Integer> findIdByTitle(String title) {
+        return przepisDao.findIdByTitle(title);
+    }
+
+    public LiveData<Przepis> findPrzepisById(int id) {
+        return przepisDao.findPrzepisById(id);
+    }
 }
