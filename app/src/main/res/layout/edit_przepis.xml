@@ -1,7 +1,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/przepisinfo_scroll">
+    android:id="@+id/edit_przepis_scroll">
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/edit_przepis"
         android:layout_width="match_parent"
@@ -44,7 +44,7 @@
             android:layout_below="@id/edit_text_instructions"
             android:hint="@string/liczba_porcji"
             android:inputType="number"
-            android:layout_margin="16dp"/>
+            android:layout_margin="16dp" />
 
         <ImageView
             android:id="@+id/image_view"
@@ -67,7 +67,7 @@
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_alignParentStart="true"
-            android:text="Wybierz z galerii" />
+            android:text="@string/wybierz_z_galerii" />
 
         <Button
             android:id="@+id/button_camera"
@@ -78,7 +78,7 @@
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_alignParentEnd="true"
-            android:text="Zrób zdjęcie" />
+            android:text="@string/zrob_zdjecie" />
 
         <Button
             android:id="@+id/button_save"
@@ -89,7 +89,5 @@
             android:text="@string/zatwierdz"
             android:layout_marginTop="16dp"
             android:backgroundTint="@color/green"/>
-
     </RelativeLayout>
-
 </ScrollView>

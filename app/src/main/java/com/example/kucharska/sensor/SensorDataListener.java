@@ -1,4 +1,4 @@
-package com.example.kucharska;
+package com.example.kucharska.sensor;
 
 public interface SensorDataListener {
     void OnResume();

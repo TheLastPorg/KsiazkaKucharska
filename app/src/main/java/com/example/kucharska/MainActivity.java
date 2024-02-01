@@ -23,9 +23,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
+import com.example.kucharska.api.RecipeService;
+import com.example.kucharska.api.RetrofitInstance;
+import com.example.kucharska.database.PrzepisRepository;
+import com.example.kucharska.model.Przepis;
+import com.example.kucharska.sensor.SensorDataListener;
+import com.example.kucharska.sensor.SensorService;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.snackbar.Snackbar;
@@ -40,7 +47,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements SensorDataListener{
+public class MainActivity extends AppCompatActivity implements SensorDataListener {
 
     private PrzepisRepository przepisRepository;
     private PrzepisAdapter przepisAdapter;
@@ -64,9 +71,6 @@ public class MainActivity extends AppCompatActivity implements SensorDataListene
                     Intent intent = new Intent(MainActivity.this, DodajPrzepisActivity.class);
                     startActivity(intent);
                     return true;
-                }
-                else if(item.getItemId() == R.id.navigation_home) {
-                        return true;
                 }
                 return false;
             }

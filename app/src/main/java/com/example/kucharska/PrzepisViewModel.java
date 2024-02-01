@@ -7,6 +7,9 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
+import com.example.kucharska.database.PrzepisRepository;
+import com.example.kucharska.model.Przepis;
+
 import java.util.List;
 
 public class PrzepisViewModel extends AndroidViewModel {

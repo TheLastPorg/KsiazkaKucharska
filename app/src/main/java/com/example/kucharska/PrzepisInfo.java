@@ -2,8 +2,6 @@ package com.example.kucharska;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -17,12 +15,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.kucharska.model.Przepis;
+import com.example.kucharska.sensor.SensorDataListener;
+import com.example.kucharska.sensor.SensorService;
 import com.squareup.picasso.Picasso;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class PrzepisInfo extends AppCompatActivity implements SensorDataListener{
+public class PrzepisInfo extends AppCompatActivity implements SensorDataListener {
 
     private boolean isRecipeInDatabase;
     private TextView przepisTitleTextView;

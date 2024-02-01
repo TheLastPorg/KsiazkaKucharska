@@ -1,4 +1,4 @@
-package com.example.kucharska;
+package com.example.kucharska.model;
 
 import android.media.Image;
 import android.widget.ImageView;

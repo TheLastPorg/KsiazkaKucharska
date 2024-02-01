@@ -11,9 +11,11 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +24,10 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.kucharska.database.PrzepisRepository;
+import com.example.kucharska.model.Przepis;
+import com.example.kucharska.sensor.SensorDataListener;
+import com.example.kucharska.sensor.SensorService;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -34,9 +40,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import kotlin.jvm.internal.Intrinsics;
-
-public class EditPrzepis extends AppCompatActivity implements MediaScannerConnection.OnScanCompletedListener {
+public class EditPrzepis extends AppCompatActivity implements MediaScannerConnection.OnScanCompletedListener, SensorDataListener {
 
     private static final int REQUEST_GALLERY_IMAGE = 3;
     private static final int REQUEST_CAMERA_IMAGE = 100;
@@ -49,6 +53,10 @@ public class EditPrzepis extends AppCompatActivity implements MediaScannerConnec
     public static final String RECIPE_INFO_IMAGE = "RECIPE_INFO_IMAGE";
     public static final String PRZEPIS = "PRZEPIS";
     private String imageString;
+    private EditText titleEditText;
+    private EditText ingredientsEditText;
+    private EditText instructionsEditText;
+    private EditText servingsEditText;
     private ImageView imageView;
     private String imagePath;
     private Uri selectedImageUri;
@@ -56,23 +64,25 @@ public class EditPrzepis extends AppCompatActivity implements MediaScannerConnec
     private PrzepisViewModel przepisViewModel;
     private List<Przepis> przepisy;
     private Przepis przepis;
+    private SensorService sensorService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.edit_przepis);
+        sensorService = new SensorService();
 
-        EditText editTitle = findViewById(R.id.edit_text_title);
-        EditText editIngredients = findViewById(R.id.edit_text_ingredients);
-        EditText editInstructions = findViewById(R.id.edit_text_instructions);
-        EditText editServings = findViewById(R.id.edit_text_servings);
+        titleEditText = findViewById(R.id.edit_text_title);
+        ingredientsEditText = findViewById(R.id.edit_text_ingredients);
+        instructionsEditText = findViewById(R.id.edit_text_instructions);
+        servingsEditText = findViewById(R.id.edit_text_servings);
         imageView = findViewById(R.id.image_view);
 
         Intent intent = getIntent();
-        editTitle.setText(intent.getStringExtra(RECIPE_INFO_TITLE));
-        editIngredients.setText(intent.getStringExtra(RECIPE_INFO_INGREDIENTS));
-        editInstructions.setText(intent.getStringExtra(RECIPE_INFO_INSTRUCTIONS));
-        editServings.setText(intent.getStringExtra(RECIPE_INFO_SERVINGS));
+        titleEditText.setText(intent.getStringExtra(RECIPE_INFO_TITLE));
+        ingredientsEditText.setText(intent.getStringExtra(RECIPE_INFO_INGREDIENTS));
+        instructionsEditText.setText(intent.getStringExtra(RECIPE_INFO_INSTRUCTIONS));
+        servingsEditText.setText(intent.getStringExtra(RECIPE_INFO_SERVINGS));
         String image = intent.getStringExtra(RECIPE_INFO_IMAGE);
         imageString = image;
         przepis = (Przepis) intent.getSerializableExtra(PRZEPIS);
@@ -99,7 +109,7 @@ public class EditPrzepis extends AppCompatActivity implements MediaScannerConnec
                 if(selectedImageUri != null) {
                     imageString = selectedImageUri.toString();
                 }
-                Przepis p = new Przepis(editTitle.getText().toString(), editIngredients.getText().toString(), editInstructions.getText().toString(), editServings.getText().toString(), image);
+                Przepis p = new Przepis(titleEditText.getText().toString(), ingredientsEditText.getText().toString(), instructionsEditText.getText().toString(), servingsEditText.getText().toString(), image);
                 p.setImage(imageString);
                 przepisViewModel.delete(przepis);
                 przepisViewModel.insert(p);
@@ -135,6 +145,9 @@ public class EditPrzepis extends AppCompatActivity implements MediaScannerConnec
                     Manifest.permission.READ_EXTERNAL_STORAGE
             }, 100);
         }
+        SensorService.setSensorDataListener(this);
+        onColorsChanged(SensorService.getTextColor(), SensorService.getBackgroundColor());
+        onHintColorChanged(SensorService.getHintColor());
     }
 
     @Override
@@ -219,5 +232,44 @@ public class EditPrzepis extends AppCompatActivity implements MediaScannerConnec
     @Override
     public void onScanCompleted(String path, Uri uri) {
         selectedImageUri = uri;
+    }
+
+    private void setTextColorForViewGroup(ViewGroup viewGroup, int color) {
+        for (int i = 0; i < viewGroup.getChildCount(); i++) {
+            View view = viewGroup.getChildAt(i);
+            if (view instanceof ViewGroup) {
+                setTextColorForViewGroup((ViewGroup) view, color);
+            } else if (view instanceof TextView) {
+                ((TextView) view).setTextColor(color);
+            }
+        }
+    }
+
+    @Override
+    public void OnResume() {
+        super.onResume();
+        sensorService.setSensorDataListener(this);
+    }
+
+    @Override
+    public void OnPause() {
+        super.onPause();
+        sensorService.setSensorDataListener(null);
+    }
+
+    @Override
+    public void onColorsChanged(int textColor, int backgroundColor) {
+        findViewById(R.id.edit_przepis).setBackgroundColor(backgroundColor);
+        findViewById(R.id.edit_przepis_scroll).setBackgroundColor(backgroundColor);
+        setTextColorForViewGroup((ViewGroup) findViewById(android.R.id.content), textColor);
+    }
+
+    @Override
+    public void onHintColorChanged(int hintColor){
+        titleEditText.setHintTextColor(hintColor);
+        ingredientsEditText.setHintTextColor(hintColor);
+        instructionsEditText.setHintTextColor(hintColor);
+        servingsEditText.setHintTextColor(hintColor);
+        Log.d("zdj", "Zmiana koloru wskazówki została zastosowana");
     }
 }

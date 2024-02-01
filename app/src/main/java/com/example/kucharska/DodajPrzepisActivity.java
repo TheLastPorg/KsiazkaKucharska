@@ -3,7 +3,6 @@ package com.example.kucharska;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -20,23 +19,24 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.EditText;
 
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.material.snackbar.Snackbar;
+import com.example.kucharska.database.PrzepisRepository;
+import com.example.kucharska.model.Przepis;
+import com.example.kucharska.sensor.SensorDataListener;
+import com.example.kucharska.sensor.SensorService;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class DodajPrzepisActivity extends AppCompatActivity implements SensorDataListener, MediaScannerConnection.OnScanCompletedListener {
@@ -52,6 +52,8 @@ public class DodajPrzepisActivity extends AppCompatActivity implements SensorDat
     private Uri selectedImageUri;
     private PrzepisRepository przepisRepository;
     private SensorService sensorService;
+    private PrzepisViewModel przepisViewModel;
+    private List<Przepis> przepisy;
 
     private static final int REQUEST_IMAGE_CAPTURE = 100;
     private static final int REQUEST_IMAGE_PICK = 3;
@@ -70,6 +72,12 @@ public class DodajPrzepisActivity extends AppCompatActivity implements SensorDat
         instructionsEditText = findViewById(R.id.edit_text_instructions);
         servingsEditText = findViewById(R.id.edit_text_servings);
         imageView = findViewById(R.id.image_view);
+
+        przepisViewModel = new ViewModelProvider(this).get(PrzepisViewModel.class);
+        przepisViewModel.findAll().observe(this, przepisy -> {
+            this.przepisy = przepisy;
+            Log.d("xd", "Przepisy: " + przepisy);
+        });
 
         if (ContextCompat.checkSelfPermission(DodajPrzepisActivity.this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(DodajPrzepisActivity.this, new String[]{
@@ -127,7 +135,7 @@ public class DodajPrzepisActivity extends AppCompatActivity implements SensorDat
         String imagePath = selectedImageUri.toString();
 
         Przepis przepis = new Przepis(title, ingredients, instructions, servings, imagePath);
-        przepisRepository.insert(przepis);
+        przepisViewModel.insert(przepis);
 
         Toast.makeText(this, "Przepis dodany pomyślnie", Toast.LENGTH_SHORT).show();
     }
@@ -158,6 +166,7 @@ public class DodajPrzepisActivity extends AppCompatActivity implements SensorDat
     @Override
     public void onColorsChanged(int textColor, int backgroundColor) {
         findViewById(R.id.dodaj_przepis).setBackgroundColor(backgroundColor);
+        findViewById(R.id.dodaj_przepis_scroll).setBackgroundColor(backgroundColor);
         setTextColorForViewGroup((ViewGroup) findViewById(android.R.id.content), textColor);
     }
 

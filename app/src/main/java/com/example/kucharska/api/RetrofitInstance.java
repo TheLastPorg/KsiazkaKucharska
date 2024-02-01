@@ -1,4 +1,4 @@
-package com.example.kucharska;
+package com.example.kucharska.api;
 
 import java.io.IOException;
 

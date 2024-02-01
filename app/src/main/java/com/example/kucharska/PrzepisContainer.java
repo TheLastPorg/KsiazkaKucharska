@@ -1,5 +1,6 @@
 package com.example.kucharska;
 
+import com.example.kucharska.model.Przepis;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;

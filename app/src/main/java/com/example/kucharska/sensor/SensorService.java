@@ -1,4 +1,4 @@
-package com.example.kucharska;
+package com.example.kucharska.sensor;
 
 import android.app.Service;
 import android.content.Context;
@@ -10,10 +10,13 @@ import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.example.kucharska.R;
+import com.example.kucharska.sensor.SensorDataListener;
+
 public class SensorService extends Service implements SensorEventListener {
     private SensorManager sensorManager;
     private Sensor lightSensor;
-    private int threshold = 11000;
+    private int threshold = 10;
     private static int textColor;
     private static int backgroundColor;
     private static int hintColor;

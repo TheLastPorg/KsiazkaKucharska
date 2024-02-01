@@ -1,4 +1,4 @@
-package com.example.kucharska;
+package com.example.kucharska.database;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
@@ -8,10 +8,9 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
-import java.util.List;
+import com.example.kucharska.model.Przepis;
 
-import retrofit2.http.DELETE;
-import retrofit2.http.GET;
+import java.util.List;
 
 @Dao
 public interface PrzepisDao {

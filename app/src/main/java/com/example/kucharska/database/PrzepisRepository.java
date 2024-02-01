@@ -1,10 +1,11 @@
-package com.example.kucharska;
+package com.example.kucharska.database;
 
 import android.app.Application;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
+
+import com.example.kucharska.model.Przepis;
 
 import java.util.List;
 
@@ -20,17 +21,17 @@ public class PrzepisRepository {
         Log.d("xd", "PrzepisRepository created " + przepisy.getValue());
     }
 
-    LiveData<List<Przepis>> getPrzepisy() { return przepisy; }
+    public LiveData<List<Przepis>> getPrzepisy() { return przepisy; }
 
-    void insert(Przepis przepis) {
+    public void insert(Przepis przepis) {
         PrzepisyDatabase.databaseWriteExecutor.execute(() -> przepisDao.insert(przepis));
     }
 
-    void update(Przepis przepis) {
+    public void update(Przepis przepis) {
         PrzepisyDatabase.databaseWriteExecutor.execute(() -> przepisDao.update(przepis));
     }
 
-    void delete(Przepis przepis) {
+    public void delete(Przepis przepis) {
         PrzepisyDatabase.databaseWriteExecutor.execute(() -> przepisDao.delete(przepis));
     }
 
