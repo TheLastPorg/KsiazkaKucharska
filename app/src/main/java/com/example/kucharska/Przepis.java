@@ -1,8 +1,17 @@
 package com.example.kucharska;
 
-import com.google.gson.annotations.SerializedName;
+import android.media.Image;
+import android.widget.ImageView;
 
+import com.google.gson.annotations.SerializedName;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "przepisy")
 public class Przepis {
+
+    @PrimaryKey(autoGenerate = true)
+    private int id;
     @SerializedName("title")
     private String title;
     @SerializedName("ingredients")
@@ -13,12 +22,20 @@ public class Przepis {
     private String servings;
     @SerializedName("image")
     private String image;
+    @SerializedName("query")
+    private String query;
+    @SerializedName("isFromApi")
+    private boolean isFromApi;
 
-    public Przepis(String title, String ingredients, String instructions, String servings) {
+    public Przepis(String title, String ingredients, String instructions, String servings, String image) {
         this.title = title;
         this.ingredients = ingredients;
         this.instructions = instructions;
         this.servings = servings;
+
+        if(image != null) {
+            this.image = image;
+        }
     }
 
     public String getTitle() {
@@ -58,5 +75,24 @@ public class Przepis {
     }
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public String getQuery() {
+        return query;
+    }
+    public void setQuery(String query) {
+        this.query = query;
+    }
+    public boolean getIsFromApi() {
+        return isFromApi;
+    }
+    public void setFromApi(boolean isFromApi) {
+        this.isFromApi = isFromApi;
+    }
+    public int getId() {
+        return id;
+    }
+    public void setId(int id) {
+        this.id = id;
     }
 }

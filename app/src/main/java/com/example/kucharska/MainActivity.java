@@ -4,15 +4,20 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityCompat;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -29,11 +34,16 @@ import android.widget.ScrollView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.List;
 
 import retrofit2.Call;
@@ -42,18 +52,50 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements SensorDataListener{
 
+    private PrzepisRepository przepisRepository;
+    private PrzepisAdapter przepisAdapter;
+
+    private static final int REQUEST_CODE_READ_EXTERNAL_STORAGE = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+
+        bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                if (item.getItemId() == R.id.navigation_add) {
+                    Intent intent = new Intent(MainActivity.this, DodajPrzepisActivity.class);
+                    startActivity(intent);
+                    return true;
+                }
+                else if(item.getItemId() == R.id.navigation_home) {
+                        return true;
+                }
+                return false;
+            }
+        });
+        if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != getPackageManager().PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_CODE_READ_EXTERNAL_STORAGE);
+        }
+
         Log.d("MainActivity", "Start");
         Intent serviceIntent = new Intent(MainActivity.this, SensorService.class);
         startService(serviceIntent);
         SensorService.setSensorDataListener(this);
-
+        przepisRepository = new PrzepisRepository(getApplication());
+        przepisAdapter = new PrzepisAdapter();
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setAdapter(przepisAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         Log.d("MainActivity", "Start sensor");
+
+        loadRecipesFromDatabase();
     }
 
 
@@ -63,6 +105,20 @@ public class MainActivity extends AppCompatActivity implements SensorDataListene
 
         RelativeLayout relativeLayout = findViewById(R.id.main_view);
         relativeLayout.setBackgroundColor(backgroundColor);
+    }
+
+    public void loadRecipesFromDatabase() {
+        Log.d("MainActivity", "loadRecipesFromDatabase");
+        przepisRepository.getPrzepisy().observe(this, new Observer<List<Przepis>>() {
+            @Override
+            public void onChanged(List<Przepis> przepis) {
+                Log.d("MainActivity", "loadRecipesFromDatabase2");
+                if (przepis != null) {
+                    Log.d("MainActivity", "loadRecipesFromDatabase3");
+                    przepisAdapter.setPrzepisy(przepis);
+                }
+            }
+        });
     }
 
     private boolean checkNullOrEmpty(String text) {
@@ -83,13 +139,20 @@ public class MainActivity extends AppCompatActivity implements SensorDataListene
             @Override
             public boolean onQueryTextSubmit(String query) {
                 Log.d("MainActivity", query);
-                fetchRecipesData(query);
+                if (TextUtils.isEmpty(query)) {
+                    przepisAdapter.clearPrzepisy(); // Usuń wyniki z RecyclerView
+                } else {
+                    fetchRecipesData(query);
+                }
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 //Log.d("MainActivity", "onQueryTextChange");
+                if (TextUtils.isEmpty(newText)) {
+                    przepisAdapter.clearPrzepisy(); // Usuń wyniki z RecyclerView
+                }
                 return false;
             }
         });
@@ -110,9 +173,14 @@ public class MainActivity extends AppCompatActivity implements SensorDataListene
             @Override
             public void onResponse(Call<List<Przepis>> call, @NonNull Response<List<Przepis>> response) {
                 Log.d("MainActivity", "onResponse");
-                if(response != null) {
+                List<Przepis> przepisy = response.body();
+
+                if(response != null && !przepisy.isEmpty()) {
+                    przepisAdapter.setPrzepisy(przepisy);
                     Log.d("MainActivity", response.toString());
-                    setupPrzepisyListView(response.body());
+                } else {
+                    przepisAdapter.clearPrzepisy();
+                    Snackbar.make(findViewById(R.id.main_view), "No results found", Snackbar.LENGTH_LONG).show();
                 }
             }
 
@@ -156,11 +224,12 @@ public class MainActivity extends AppCompatActivity implements SensorDataListene
             instructionsTextView = itemView.findViewById(R.id.recipe_instructions);
             servingsTextView = itemView.findViewById(R.id.recipe_servings);
             imageView = itemView.findViewById(R.id.img);
+            Log.d("Image", imageView.toString());
         }
 
         public void bind(Przepis przepis) {
             Log.d("MainActivity", "bind");
-            if(przepis != null && checkNullOrEmpty(przepis.getTitle())) {
+            if (przepis != null && checkNullOrEmpty(przepis.getTitle())) {
                 Log.d("MainActivity", "bind2");
                 this.przepis = przepis;
                 Log.d("MainActivity", przepis.getTitle());
@@ -169,19 +238,19 @@ public class MainActivity extends AppCompatActivity implements SensorDataListene
                 servingsTextView.setText(String.valueOf(przepis.getServings()));
                 Log.d("MainActivity", "servingsTextView set");
                 String image = przepis.getImage();
+                Log.d("zdj", "zdj " + image);
+
                 if (image != null) {
-                    Log.d("MainActivity", "bind3");
-                    Picasso.with(itemView.getContext())
-                            .load(image)
-                            .placeholder(R.drawable.meal)
-                            .into(imageView);
-                }
-                else {
-                    Log.d("MainActivity", "bind4");
+                    // Użyj metody loadImageFromUri do załadowania obrazu z galerii
+                    loadImageFromUri(Uri.parse(image));
+                } else {
+                    // Jeśli nie ma obrazu, użyj domyślnej grafiki
+                    Log.d("Image", "bind4");
                     imageView.setImageResource(R.drawable.meal);
                 }
             }
         }
+
 
         @Override
         public void onClick(View v) {
@@ -200,6 +269,16 @@ public class MainActivity extends AppCompatActivity implements SensorDataListene
                 intent.putExtra(PrzepisInfo.RECIPE_INFO_IMAGE, przepis.getImage());
                 Log.d("Click", intent.toString());
                 startActivity(intent);
+            }
+        }
+        private void loadImageFromUri(Uri uri) {
+            try {
+                InputStream inputStream = getContentResolver().openInputStream(uri);
+                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                imageView.setImageBitmap(bitmap);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Log.e("MainActivity", "FileNotFoundException: " + e.getMessage());
             }
         }
     }
@@ -229,13 +308,10 @@ public class MainActivity extends AppCompatActivity implements SensorDataListene
 
         @Override
         public int getItemCount() {
-            Log.d("MainActivity", "getItemCount");
             if(przepisy != null) {
-                Log.d("MainActivity", "getItemCount2");
                 return przepisy.size();
             }
             else {
-                Log.d("MainActivity", "getItemCount3");
                 return 0;
             }
         }
@@ -245,5 +321,27 @@ public class MainActivity extends AppCompatActivity implements SensorDataListene
             this.przepisy = przepisy;
             notifyDataSetChanged();
         }
+
+        public void clearPrzepisy() {
+            Log.d("MainActivity", "clearPrzepisy");
+            przepisy.clear();
+            notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void OnResume() {
+        super.onResume();
+        SensorService.setSensorDataListener(this);
+    }
+    @Override
+    public void OnPause() {
+        super.onPause();
+        SensorService.setSensorDataListener(null);
+    }
+
+    @Override
+    public void onHintColorChanged(int hintColor) {
+        return;
     }
 }

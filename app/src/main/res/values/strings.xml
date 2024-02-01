@@ -3,4 +3,11 @@
     <string name="search">Search</string>
     <string name="clear_search">Clear search</string>
     <string name="recipe_img" />
+    <string name="liczba_porcji">Liczba porcji</string>
+    <string name="instrukcje">Instrukcje</string>
+    <string name="dodaj_przepis">Dodaj przepis</string>
+    <string name="skladniki">Składniki (oddzielone znakiem | )</string>
+    <string name="tytul_przepisu">Tytuł przepisu</string>
+    <string name="wybierz_z_galerii">Wybierz z galerii</string>
+    <string name="zrob_zdjecie">Zrób zdjęcie</string>
 </resources>
